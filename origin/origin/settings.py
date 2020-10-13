@@ -90,7 +90,7 @@ DATABASES = {
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.authentication.BasicAuthentication',
+        #'rest_framework.authentication.BasicAuthentication',
     ],
     'TEST_REQUEST_DEFAULT_FORMAT': 'json'
 }
