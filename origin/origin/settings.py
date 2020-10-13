@@ -71,6 +71,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'origin.wsgi.application'
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.BasicAuthentication',
+    ],
+    'TEST_REQUEST_DEFAULT_FORMAT': 'json'
+}
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
