@@ -7,7 +7,10 @@ from .models import Bond
 from .serializers import BondSerializer
 
 
-#todo move shared setup to a test utils file
+#TODO: use 'accurate' and more test data
+#TODO: modularise
+
+#TODO move shared setup to a test utils file
 def create_mock_bonds():
         Bond.objects.create(
             isin = "FR0000131104", 
@@ -47,5 +50,34 @@ class GetAllBonds(APITestCase):
         serializer = BondSerializer(bonds, many=True)
         self.assertEqual(response.data, serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+class PostBond(APITestCase):
+        def setUp(self):
+        self.valid_post_data = {
+            "isin":"GB0000131104", 
+            "size": 10, 
+            "currency": "GBP",
+            "maturity": "2025-02-28",
+            "lei": "QZPUOSFLUMMPRH8K5P83", 
+            "legal_name": "Slaughter and May"
+        }
+
+        self.invalid_post_data = {
+            "isin":"", 
+            "size": 10, 
+            "currency": "GBP",
+            "maturity": "2025-02-28",
+            "lei": "QZPUOSFLUMMPRH8K5P83", 
+            "legal_name": "Slaughter and May"
+        }
+    
+    def test_post_bond(self):
+        response = client.post(
+            reverse("bonds"),
+                data=json.dumps(self.valid_post_data), 
+                content_type="application/json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         
