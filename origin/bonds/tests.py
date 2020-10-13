@@ -14,7 +14,7 @@ import json
 
 #TODO move shared setup to a test utils file
 def create_mock_bonds():
-        Bond.objects.create(
+        b1 = Bond.objects.create(
             isin = "FR0000131104", 
             size = 100000, 
             currency = "EUR",
@@ -22,13 +22,15 @@ def create_mock_bonds():
             lei = "R0MUWSFPU8MPRO8K5P83", 
             legal_name = "Herbert Smith")
 
-        Bond.objects.create(
+        b2 = Bond.objects.create(
             isin = "GB0000131104", 
             size = 10, 
             currency = "GBP",
             maturity = "2025-02-28",
             lei = "QZPUOSFLUMMPRH8K5P83", 
             legal_name = "Slaughter and May")
+
+        return b1, b2
 
 class BondTest(APITestCase):
     def setUp(self):
@@ -43,6 +45,7 @@ class BondTest(APITestCase):
 
 client = APIClient()
 class GetAllBonds(APITestCase):
+
     def setUp(self):
         create_mock_bonds()
     
@@ -53,6 +56,23 @@ class GetAllBonds(APITestCase):
         self.assertEqual(response.data, serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+
+class GetFilteredRequest(APITestCase):
+    def setUp(self):
+        b1, b2 = create_mock_bonds()
+        self.bond1 = b1
+        self.bond2 = b2
+    
+    def test_filter_by_name(self):
+        response = client.get(
+            reverse('bonds'),
+            kwargs={'legal_name': self.bond1.legal_name}
+        )
+        found_bond = Bond.objects.get(legal_name=self.bond1.legal_name)
+        serializer = BondSerializer(found_bond)
+        self.assertEqual(response.data, serializer.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
 
 class PostBond(APITestCase):
 
