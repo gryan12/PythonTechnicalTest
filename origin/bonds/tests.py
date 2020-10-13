@@ -6,6 +6,8 @@ from django.db import models
 from .models import Bond
 from .serializers import BondSerializer
 
+import json
+
 
 #TODO: use 'accurate' and more test data
 #TODO: modularise
@@ -53,7 +55,8 @@ class GetAllBonds(APITestCase):
 
 
 class PostBond(APITestCase):
-        def setUp(self):
+
+    def setUp(self):
         self.valid_post_data = {
             "isin":"GB0000131104", 
             "size": 10, 
