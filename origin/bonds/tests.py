@@ -1,13 +1,7 @@
-from rest_framework.test import APISimpleTestCase, APITestCase
+from rest_framework.test import APITestCase
 from django.db import models
 
 from .models import Bond
-
-
-class HelloWorld(APISimpleTestCase):
-    def test_root(self):
-        resp = self.client.get("/")
-        assert resp.status_code == 200
 
 class BondTest(APITestCase):
     def setUp(self):
