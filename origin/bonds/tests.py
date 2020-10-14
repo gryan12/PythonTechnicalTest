@@ -12,9 +12,6 @@ import json
 from .services import get_legal_name
 
 
-#TODO: use 'accurate' and more test data
-#TODO: modularise
-
 #TODO move shared setup to a test utils file
 def create_mock_bonds():
         b1 = Bond.objects.create(
@@ -179,23 +176,22 @@ class PostBond(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     
-
-## integration tests
 class ServicesTest(APITestCase):
-
     def setUp(self):
         self.url = "https://leilookup.gleif.org/api/v2/leirecords?lei="
         self.lei1 = "R0MUWSFPU8MPRO8K5P83"
         self.lei2 = "QZPUOSFLUMMPRH8K5P83"
 
-    def test_invalid_api_calls_throws(self):
-        with self.assertRaises(requests.HTTPError) as context:
-            get_legal_name("an incorrect string")
-            self.assertEqual(context.response.status_code, 400)
-            get_legal_name(self.lei2)
-            self.assertEqual(context.response.status_code, 400)
+   # def test_invalid_api_calls_returns_none(self):
+   #     with self.assertRaises(requests.HTTPError) as context:
+   #         get_legal_name("an incorrect string")
+   #         self.assertEqual(context.response.status_code, 400)
+   #         get_legal_name(self.lei2)
+   #         self.assertEqual(context.response.status_code, 400)
 
-    ##integration
+    def test_invalid_api_call_returns_none(self):
+        self.assertEqual(None, get_legal_name("an incorrect string"))
+
     def test_api_call_returns_expected_name(self):
         self.assertEqual("BNP PARIBAS", get_legal_name(self.lei1))
     

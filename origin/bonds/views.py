@@ -41,7 +41,7 @@ class Bonds(APIView):
     def post(self, request):
 
         data = request.data
-            
+
         if not data["legal_name"]:
             if not data["legal_name"] and data["lei"]:
                 data["legal_name"] = get_legal_name(data["lei"])
