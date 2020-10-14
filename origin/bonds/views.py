@@ -6,6 +6,8 @@ from django.urls import reverse
 from .serializers import BondSerializer
 from .models import Bond
 
+import json
+
 from .services import get_legal_name
 
 
@@ -38,25 +40,11 @@ class Bonds(APIView):
     #      need to implement the lei api call
     def post(self, request):
 
-        data = {
-            "isin": request.data.get("isin"),
-            "currency": request.data.get("currency"),
-            "maturity": request.data.get("maturity"),
-            "size": int(request.data.get("size")),
-            "lei": request.data.get("lei"),
-            "legal_name": request.data.get("legal_name"),
-        }
-
-        fetched_name = None
-        if not request.data["legal_name"]:
-            if not data["legal_name"]:
-                try:
-                    data["legal_name"] = get_legal_name(data["lei"])
-                except Exception as e:
-                    return Response(status=status.HTTP_400_BAD_REQUEST)
+        data = request.data
             
-        else:
-            data["legal_name"] = request.data.get("legal_name")
+        if not data["legal_name"]:
+            if not data["legal_name"] and data["lei"]:
+                data["legal_name"] = get_legal_name(data["lei"])
 
         serialiser = BondSerializer(data=data)
 
