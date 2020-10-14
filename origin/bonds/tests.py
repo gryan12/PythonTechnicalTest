@@ -2,6 +2,9 @@ from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
 from django.urls import reverse
 from django.db import models
+from rest_framework.authtoken.models import Token
+
+from django.contrib.auth.models import User
 
 import requests
 from .models import Bond
@@ -22,18 +25,25 @@ def create_mock_bonds():
             lei = "R0MUWSFPU8MPRO8K5P83", 
             legal_name = "BNP PARIBAS")
 
-        #invalid
         b2 = Bond.objects.create(
             isin = "GB0000131104", 
             size = 10, 
             currency = "GBP",
             maturity = "2025-02-28",
             lei = "QZPUOSFLUMMPRH8K5P83", 
-            legal_name = "Slaughter and May")
+            legal_name = "Slaughter and May") 
 
         return b1, b2
+    
 
-class BondTest(APITestCase):
+client = APIClient()
+
+def make_and_force_authenticate_user():
+    test_user = User.objects.create_user(username="user_test2", password="test_password")
+    client.force_authenticate(user=test_user)
+
+
+class BondModelTest(APITestCase):
     def setUp(self):
         create_mock_bonds()
 
@@ -43,11 +53,11 @@ class BondTest(APITestCase):
         self.assertEqual(lei_1.get_lei(), "R0MUWSFPU8MPRO8K5P83")
         self.assertEqual(lei_2.get_lei(), "QZPUOSFLUMMPRH8K5P83")
 
+class BondViewGetest(APITestCase):
 
-client = APIClient()
-class GetAllBonds(APITestCase):
     def setUp(self):
-        create_mock_bonds()
+        self.bond1, self.bond2 = create_mock_bonds()
+        make_and_force_authenticate_user()
     
     def test_get_all_bonds(self):
         response = client.get(reverse('bonds'))
@@ -56,13 +66,6 @@ class GetAllBonds(APITestCase):
         self.assertEqual(response.data, serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-
-class GetFilteredRequest(APITestCase):
-    def setUp(self):
-        b1, b2 = create_mock_bonds()
-        self.bond1 = b1
-        self.bond2 = b2
-    
     def test_filter_by_legal_name(self):
         response = client.get(
             reverse('bonds'),
@@ -73,6 +76,7 @@ class GetFilteredRequest(APITestCase):
         bonds = Bond.objects.filter(legal_name=self.bond1.legal_name)
         serializer = BondSerializer(bonds, many=True)
 
+        print(response.data)
         self.assertEqual(response.data, serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -95,6 +99,7 @@ class GetFilteredRequest(APITestCase):
             {'isin': "022003040330"}
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
 
 class PostBond(APITestCase):
 
@@ -122,6 +127,9 @@ class PostBond(APITestCase):
             "lei": "QZPUOSFLUMMPRH8K5P83", 
             "legal_name": "Slaughter and May"
         }
+
+        make_and_force_authenticate_user()
+
     
     def test_valid_full_bond_validates(self):
         response = client.post(

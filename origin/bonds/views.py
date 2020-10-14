@@ -3,6 +3,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.urls import reverse
 
+from rest_framework.permissions import IsAuthenticated
+
 from .serializers import BondSerializer
 from .models import Bond
 
@@ -12,7 +14,7 @@ from .services import get_legal_name
 
 
 class Bonds(APIView):
-
+    permission_classes = [IsAuthenticated]
     def get(self, request):
 
         bonds = Bond.objects.all()
