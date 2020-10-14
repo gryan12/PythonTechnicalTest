@@ -8,6 +8,8 @@ from .serializers import BondSerializer
 
 import json
 
+from .services import get_legal_name
+
 
 #TODO: use 'accurate' and more test data
 #TODO: modularise
@@ -88,7 +90,13 @@ class GetFilteredRequest(APITestCase):
 
         self.assertEqual(response.data, serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        
+    
+    def test_invalid_filter(self):
+        response = client.get(
+            reverse('bonds'),
+            {'isin': "022003040330"}
+        )
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 class PostBond(APITestCase):
 
@@ -118,5 +126,23 @@ class PostBond(APITestCase):
                 content_type="application/json"
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+    
+
+class ServicesTest(APITestCase):
+
+    def setUp(self):
+        self.url = "https://leilookup.gleif.org/api/v2/leirecords?lei="
+        self.lei1 = "R0MUWSFPU8MPRO8K5P83"
+
+    def test_can_access_api(self):
+        get_legal_name(self.lei1)
+        self.assertEqual(1, 1)
+
+    
+
+        
+
+
+
 
         
