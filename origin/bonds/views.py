@@ -8,10 +8,28 @@ from .models import Bond
 
 
 class Bonds(APIView):
+
     def get(self, request):
         bonds = Bond.objects.all()
+
+        query_fields = request.GET.dict()
+
+        #TODO: clean, extensible way of delegating this to the Bond model?
+        fields = ["isin", "size", "currency", "maturity", "lei", "legal_name"]
+
+        parsed_query_fields = {
+            x: query_fields[x] for x in query_fields if x in fields
+        }
+
+        try:
+            if parsed_query_fields:
+                bonds = Bond.objects.filter(**parsed_query_fields)
+        except:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
         serializer = BondSerializer(bonds, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
 
     #TODO: incoming requests assumed to not provide legal_name
     #      need to implement the lei api call
@@ -24,6 +42,7 @@ class Bonds(APIView):
             "lei": request.data.get("lei"),
             "legal_name": request.data.get("legal_name"),
         }
+
         serialiser = BondSerializer(data=data)
 
         if serialiser.is_valid():

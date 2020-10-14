@@ -45,7 +45,6 @@ class BondTest(APITestCase):
 
 client = APIClient()
 class GetAllBonds(APITestCase):
-
     def setUp(self):
         create_mock_bonds()
     
@@ -63,13 +62,30 @@ class GetFilteredRequest(APITestCase):
         self.bond1 = b1
         self.bond2 = b2
     
-    def test_filter_by_name(self):
+    def test_filter_by_legal_name(self):
         response = client.get(
             reverse('bonds'),
-            kwargs={'legal_name': self.bond1.legal_name}
+            {'legal_name': self.bond1.legal_name}
         )
-        found_bond = Bond.objects.get(legal_name=self.bond1.legal_name)
-        serializer = BondSerializer(found_bond)
+        
+        bonds = Bond.objects.all()
+        bonds = Bond.objects.filter(legal_name=self.bond1.legal_name)
+        serializer = BondSerializer(bonds, many=True)
+
+        self.assertEqual(response.data, serializer.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_filter_by_size(self):
+        response = client.get(
+            reverse('bonds'),
+            {'size': self.bond1.size}
+        )
+        
+        bonds = Bond.objects.all()
+        bonds = Bond.objects.filter(size=self.bond1.size)
+        serializer = BondSerializer(bonds, many=True)
+        print(response.data, " : ", serializer.data)
+
         self.assertEqual(response.data, serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
