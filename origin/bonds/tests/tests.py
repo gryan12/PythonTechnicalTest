@@ -48,11 +48,12 @@ class TestAuthenticationAccess(APITestCase):
 
     def test_unauthenticated_cannot_access(self):
         response = client.get(reverse('bonds'))
-        self.assertequal(response.status_code, status.http_401_unauthorized)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_authorized_can_access(self):
+        make_and_authenticate_test_user()
         response = client.get(reverse('bonds'))
-        self.assertequal(response.status_code, status.http_401_unauthorized)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
 class BondViewGetest(APITestCase):
