@@ -1,2 +1,4 @@
 Django==2.2.13
 djangorestframework==3.9.4
+django-filter==2.4.0
+requests==2.24.0
