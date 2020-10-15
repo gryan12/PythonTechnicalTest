@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import RegexValidator
+from django.contrib.auth import get_user_model
 
 class Bond(models.Model):
     isin = models.CharField(max_length = 12, validators= [
@@ -16,16 +17,20 @@ class Bond(models.Model):
     ])
     legal_name = models.CharField(max_length=50)
 
-    ##placeholders
+    user = models.ForeignKey(
+        get_user_model(),
+        default=1,
+        on_delete = models.CASCADE,
+    )
+
     def __repr__(self):
         return self.isin 
 
     def __str__(self):
         return self.isin + " issued by: " + self.legal_name
 
+    #TODO remove
     def get_lei(self):
         return self.lei
     
-    def get_fields_as_str(self):
-        return ["isin", "size", "currency", "maturity", "lei", "legal_name"]
 
