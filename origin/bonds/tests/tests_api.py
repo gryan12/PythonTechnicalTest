@@ -40,9 +40,10 @@ def make_and_authenticate_test_user():
         test_user_4 = User.objects.create_user(username="test_user_one", password="test_password")
         test_token = Token.objects.create(user=test_user_4)
         client.credentials(HTTP_AUTHORIZATION='Token ' + test_token.key)
+        return test_user_4
 
 
-class TestAuthenticationAccess(APITestCase):
+class TestAuthentication(APITestCase):
     def setUp(self):
         create_mock_bonds
 
@@ -57,22 +58,23 @@ class TestAuthenticationAccess(APITestCase):
 
     def test_users_cannot_get_others_data(self):
         #make with user1
-        make_and_authenticate_test_user()
+        first_user = make_and_authenticate_test_user()
         create_mock_bonds()
+        first_user_response = client.get(reverse('bonds'))
 
-        #reauthenticate as user2
-        test_user = User.objects.create_user(username="test_user_two", password="test_password")
-        test_token = Token.objects.create(user=test_user)
+        second_user = User.objects.create_user(username="test_user_two", password="test_password")
+        test_token = Token.objects.create(user=second_user)
         client.credentials(HTTP_AUTHORIZATION='Token ' + test_token.key)
+        second_user_response = client.get(reverse('bonds'))
 
-        response = client.get(reverse('bonds'))
-        print(response.data)
+        first_user_bonds = Bond.objects.all().filter(user=first_user)
+        first_user_serializer = BondSerializer(first_user_bonds, many=True)
 
-        bonds = Bond.objects.all()
-        serializer = BondSerializer(bonds, many=True)
+        second_user_bonds = Bond.objects.all().filter(user=second_user)
+        second_user_serializer = BondSerializer(second_user_bonds, many=True)
 
-        self.assertFalse(len(response.data))
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(first_user_serializer.data, first_user_response.data)
+        self.assertEqual(second_user_serializer.data, second_user_response.data)
 
 
 class BondViewGet(APITestCase):
