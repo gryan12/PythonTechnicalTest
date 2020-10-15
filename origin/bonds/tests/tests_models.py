@@ -42,22 +42,12 @@ class BondModelTest(APITestCase):
         isin_with_punctuation = "FR.0001,1104"
         isin_with_invalid_size = "FR00131104"
 
-        modelData = {
-            "isin" : isin_with_punctuation, 
-            "size" : 100000, 
-            "currency" : "EUR",
-            "maturity" : "2025-02-28", 
-            "lei" : "R0MUWSFPU8MPRO8K5P83", 
-            "legal_name" : "BNP PARIBAS"
-        }
+        self.valid_bond["isin"] = isin_with_punctuation
 
-        serializer = BondSerializer(data=modelData)
+        serializer = BondSerializer(data=self.valid_bond)
         self.assertFalse(serializer.is_valid())
 
-        modelData["isin"] = isin_with_invalid_size
+        self.valid_bond["isin"] = isin_with_invalid_size
 
-        serializer = BondSerializer(data=modelData)
+        serializer = BondSerializer(data=self.valid_bond)
         self.assertFalse(serializer.is_valid())
-
-
-

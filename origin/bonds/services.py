@@ -1,7 +1,6 @@
 import requests
 import json
 
-
 _TIMEOUT = 5
 _GLEI_URL = "https://leilookup.gleif.org/api/v2/leirecords?lei="
 
@@ -28,14 +27,3 @@ def get_legal_name(lei):
             return data[0].get('Entity').get('LegalName').get("$")
 
     return None
-
-
-
-
-
-
-
-    
-
-
-

@@ -3,19 +3,13 @@ from rest_framework import status
 from django.urls import reverse
 from django.db import models
 from rest_framework.authtoken.models import Token
-
 from django.contrib.auth.models import User
-
-import requests
 from ..models import Bond
 from ..serializers import BondSerializer
-
+from ..services import get_legal_name
+import requests
 import json
 
-from ..services import get_legal_name
-
-
-client = APIClient()
 
 def create_mock_bonds():
         b1 = Bond.objects.create(
@@ -43,6 +37,7 @@ def make_and_authenticate_test_user():
         return test_user_4
 
 
+client = APIClient()
 class TestAuthentication(APITestCase):
     def setUp(self):
         create_mock_bonds
@@ -57,7 +52,7 @@ class TestAuthentication(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_users_cannot_get_others_data(self):
-        #make with user1
+
         first_user = make_and_authenticate_test_user()
         create_mock_bonds()
         first_user_response = client.get(reverse('bonds'))
@@ -88,6 +83,7 @@ class BondViewGet(APITestCase):
         serializer = BondSerializer(bonds, many=True)
         self.assertEqual(response.data, serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+    
 
     def test_filter_by_legal_name(self):
         response = client.get(
@@ -99,7 +95,6 @@ class BondViewGet(APITestCase):
         bonds = Bond.objects.filter(legal_name=self.bond1.legal_name)
         serializer = BondSerializer(bonds, many=True)
 
-        print(response.data)
         self.assertEqual(response.data, serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -116,12 +111,14 @@ class BondViewGet(APITestCase):
         self.assertEqual(response.data, serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
     
-    def test_invalid_filter(self):
+    def test_invalid_filter_returns_404(self):
         response = client.get(
             reverse('bonds'),
             {'isin': "022003040330"}
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+    
+
 
 
 class PostBond(APITestCase):
@@ -205,9 +202,8 @@ class PostBond(APITestCase):
             data = json.dumps(self.valid_post_data), 
             content_type="application/json"
         )
-        response_data = json.loads(response.content)
 
-        self.assertEqual("BNP PARIBAS", response_data["legal_name"])
+        self.assertEqual("BNP PARIBAS", response.data["legal_name"])
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
     
     def test_integration_invalid_returns_400(self):
@@ -216,24 +212,5 @@ class PostBond(APITestCase):
             data = json.dumps(self.invalid_post_data),
             content_type="application/json"
         )
+
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-    
-
-
-
-    
-
-    
-    
-
-    
-    
-
-    
-
-        
-
-
-
-
-        

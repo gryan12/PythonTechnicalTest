@@ -1,15 +1,13 @@
+import json
+
+from django.urls import reverse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from django.urls import reverse
-
 from rest_framework.permissions import IsAuthenticated
 
 from .serializers import BondSerializer
 from .models import Bond
-
-import json
-
 from .services import get_legal_name
 
 class Bonds(APIView):
@@ -22,7 +20,6 @@ class Bonds(APIView):
             If parameters present, returns 404 is no matching bonds. 
             If no parameters present, returns empty dict if empty
         """
-
         bonds = Bond.objects.all().filter(user=request.user)
         query_fields = request.GET.dict()
 

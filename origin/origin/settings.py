@@ -73,7 +73,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'origin.wsgi.application'
 
 
-
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
@@ -93,8 +92,6 @@ REST_FRAMEWORK = {
     ],
     'TEST_REQUEST_DEFAULT_FORMAT': 'json',
 }
-
-
 
 
 # Password validation

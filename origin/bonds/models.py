@@ -25,5 +25,3 @@ class Bond(models.Model):
         default=1,
         on_delete = models.CASCADE,
     )
-
-
