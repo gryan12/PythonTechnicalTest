@@ -5,11 +5,11 @@ import json
 _TIMEOUT = 5
 _GLEI_URL = "https://leilookup.gleif.org/api/v2/leirecords?lei="
 
-
 def get_legal_name(lei):
     """
         lei: :string:, length 12
-        returns None if cannot parse Legal Name from @lei
+        returns None if does not elicit correct response from server
+        : else returns legal_name of type :string:
     """
     try: 
         resp =  requests.get(

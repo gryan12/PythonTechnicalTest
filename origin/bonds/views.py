@@ -15,13 +15,20 @@ from .services import get_legal_name
 class Bonds(APIView):
     def get(self, request):
 
+        """
+            Filters all bonds by the user making the request
+            Filters all bonds by query parameters if parameter keys are Bond fields
+            Returns matching bond data
+            If parameters present, returns 404 is no matching bonds. 
+            If no parameters present, returns empty dict if empty
+        """
+
         bonds = Bond.objects.all().filter(user=request.user)
-        
         query_fields = request.GET.dict()
 
-        #TODO: clean, extensible way of delegating this to the Bond model?
         fields = ["isin", "size", "currency", "maturity", "lei", "legal_name"]
 
+        # ignore anything that is not the name of a field
         parsed_query_fields = {
             x: query_fields[x] for x in query_fields if x in fields
         }
@@ -29,7 +36,7 @@ class Bonds(APIView):
         if parsed_query_fields:
             bonds = Bond.objects.filter(**parsed_query_fields)
         
-        #If fetching all, empty dict desired behaviour. With parameters, return 404
+        #If fetching all (no parameters), empty dict desired behaviour.
         if not bonds and parsed_query_fields: 
             return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -38,6 +45,10 @@ class Bonds(APIView):
 
 
     def post(self, request):
+        """
+            Creates and stores a bond if fields with valid data provided
+            If no legal name, will make external API call to retrieve
+        """
         data = request.data
         if not data["legal_name"]:
             if not data["legal_name"] and data["lei"]:
