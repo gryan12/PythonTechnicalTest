@@ -20,6 +20,7 @@ class Bonds(APIView):
             If parameters present, returns 404 is no matching bonds. 
             If no parameters present, returns empty dict if empty
         """
+        
         bonds = Bond.objects.all().filter(user=request.user)
         query_fields = request.GET.dict()
 

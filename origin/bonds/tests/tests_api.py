@@ -148,7 +148,7 @@ class PostBond(APITestCase):
             "legal_name": "Slaughter and May"
         }
 
-        make_and_authenticate_test_user()
+        self.test_user = make_and_authenticate_test_user()
     
     def test_valid_full_bond_validates(self):
         response = client.post(
@@ -214,3 +214,18 @@ class PostBond(APITestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+    
+    def test_can_get_posted_data(self):
+        response = client.post(
+            reverse("bonds"),
+                data=json.dumps(self.valid_post_data), 
+                content_type="application/json"
+        )
+        response = client.get(
+            reverse("bonds")
+        )
+        self.assertEqual(len(response.data), 1)
+
+
+        
+
