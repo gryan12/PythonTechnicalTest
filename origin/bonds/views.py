@@ -12,12 +12,11 @@ import json
 
 from .services import get_legal_name
 
-
 class Bonds(APIView):
-    permission_classes = [IsAuthenticated]
     def get(self, request):
 
-        bonds = Bond.objects.all()
+        bonds = Bond.objects.all().filter(user=request.user)
+        
         query_fields = request.GET.dict()
 
         #TODO: clean, extensible way of delegating this to the Bond model?
@@ -30,20 +29,16 @@ class Bonds(APIView):
         if parsed_query_fields:
             bonds = Bond.objects.filter(**parsed_query_fields)
         
-        #TODO: decide if returning empty dict actually more desirable behaviour
-        if not bonds:
+        #If fetching all, empty dict desired behaviour. With parameters, return 404
+        if not bonds and parsed_query_fields: 
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         serializer = BondSerializer(bonds, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-    #TODO: incoming requests assumed to not provide legal_name
-    #      need to implement the lei api call
     def post(self, request):
-
         data = request.data
-
         if not data["legal_name"]:
             if not data["legal_name"] and data["lei"]:
                 data["legal_name"] = get_legal_name(data["lei"])

@@ -55,8 +55,27 @@ class TestAuthenticationAccess(APITestCase):
         response = client.get(reverse('bonds'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    def test_users_cannot_get_others_data(self):
+        #make with user1
+        make_and_authenticate_test_user()
+        create_mock_bonds()
 
-class BondViewGetest(APITestCase):
+        #reauthenticate as user2
+        test_user = User.objects.create_user(username="test_user_two", password="test_password")
+        test_token = Token.objects.create(user=test_user)
+        client.credentials(HTTP_AUTHORIZATION='Token ' + test_token.key)
+
+        response = client.get(reverse('bonds'))
+        print(response.data)
+
+        bonds = Bond.objects.all()
+        serializer = BondSerializer(bonds, many=True)
+
+        self.assertFalse(len(response.data))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+class BondViewGet(APITestCase):
     def setUp(self):
         make_and_authenticate_test_user()
         self.bond1, self.bond2 = create_mock_bonds()
@@ -131,7 +150,6 @@ class PostBond(APITestCase):
         }
 
         make_and_authenticate_test_user()
-
     
     def test_valid_full_bond_validates(self):
         response = client.post(
@@ -141,6 +159,15 @@ class PostBond(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
     
+    def test_valid_returns_expected_data(self):
+        response = client.post(
+            reverse("bonds"),
+                data=json.dumps(self.valid_post_data), 
+                content_type="application/json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    
     def test_incorrect_isin_format(self):
         response = client.post(
             reverse("bonds"),
@@ -148,6 +175,7 @@ class PostBond(APITestCase):
                 content_type="application/json"
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
 
     def test_incorrect_lei_format(self):
         self.invalid_post_data["lei"] = "R0MUWSFPU8MRO8K5P83"
@@ -157,6 +185,7 @@ class PostBond(APITestCase):
                 content_type="application/json"
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
 
     def test_missing_fields(self):
         self.invalid_post_data["lei"] = "R0MUWSFPU8MRO8K5P83"
@@ -174,7 +203,9 @@ class PostBond(APITestCase):
             data = json.dumps(self.valid_post_data), 
             content_type="application/json"
         )
+        response_data = json.loads(response.content)
 
+        self.assertEqual("BNP PARIBAS", response_data["legal_name"])
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
     
     def test_integration_invalid_returns_400(self):
@@ -184,6 +215,7 @@ class PostBond(APITestCase):
             content_type="application/json"
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+    
 
 
 
